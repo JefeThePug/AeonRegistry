@@ -1,4 +1,5 @@
 
+using AeonRegistry.Endpoints.Home;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -29,16 +30,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-
-app.MapGet("/api/Welcome", () =>
-{
-    var response = new
-    {
-        Message = "Welcome to the Aeon Registry API",
-        Version = "1.0.0",
-        TimeOnly = DateTime.Now.ToString("T")
-    };
-    return Results.Ok(response);
-}).WithName("WelcomeMessage");
+// map Home Group endpoints
+app.MapHomeEndpoints();
 
 app.Run();
