@@ -1,9 +1,16 @@
 
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenAPIDocumentation();
+// get connection to the database
+var connectionString = DataUtility.GetConnectionString(builder.Configuration);
+
+// configure database context for PostgreSQL
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
