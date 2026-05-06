@@ -10,7 +10,7 @@ public static class HomeEndpoints
         var homeGroup = route.MapGroup("/api/Home")
             .WithTags("Home");
 
-        // /api/home/welcome
+        // /api/Home/welcome
         homeGroup.MapGet("/welcome", GetWelcomeMessage)
             .WithName("GetWelcomeMessage")
             .WithSummary("Welcome Message")
