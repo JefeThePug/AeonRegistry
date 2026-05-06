@@ -1,8 +1,9 @@
 
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCustomSwagger();
+builder.Services.AddOpenAPIDocumentation();
 
 var app = builder.Build();
 
@@ -10,11 +11,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "Aeon Registry API";
+        options.Theme = ScalarTheme.Kepler;
+        options.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
+    });
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 
 app.MapGet("/api/Welcome", () =>
 {
