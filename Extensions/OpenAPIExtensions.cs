@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.OpenApi.Models;
 
 namespace AeonRegistry.Extensions;
@@ -59,6 +60,28 @@ public static class OpenAPIExtensions
                     },
                     Array.Empty<string>()
                 }
+            });
+
+            string[] hiddenEndpoints = [
+                "api/auth/register",
+                "api/auth/refresh",
+                "api/auth/confirmemail",
+                "api/auth/resendconfirmationemail",
+                "api/auth/forgotpassword",
+                "api/auth/resetpassword",
+                "api/auth/manage",
+                "api/auth/manage/info",
+                "api/auth/manage/2fa",
+            ];
+
+            c.DocInclusionPredicate((docName, ApiDescription) =>
+            {
+                var path = ApiDescription.RelativePath?.ToLowerInvariant();
+                if (path is null)
+                    return false;
+                if (hiddenEndpoints.Contains(path, StringComparer.OrdinalIgnoreCase))
+                    return false;
+                return true;
             });
         });
 

@@ -28,6 +28,7 @@
     <Folder Include="Data/" />
     <Folder Include="Endpoints/" />
     <Folder Include="Endpoints/Home/" />
+    <Folder Include="Middleware/" />
     <Folder Include="Models/" />
     <Folder Include="Models/Request/" />
     <Folder Include="Models/Response/" />
