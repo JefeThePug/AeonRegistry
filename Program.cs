@@ -1,6 +1,7 @@
 
 using AeonRegistry.Endpoints.Home;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -27,6 +28,9 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
 // admin policy
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+
+// email sender services
+builder.Services.AddTransient<IEmailSender, ConsoleEmailService>();
 
 // enable validation for minimal APIs
 builder.Services.AddValidation();
