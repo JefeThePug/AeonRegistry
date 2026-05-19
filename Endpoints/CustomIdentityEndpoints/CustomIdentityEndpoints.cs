@@ -1,0 +1,130 @@
+
+using AeonRegistry.Endpoints.CustomIdentityEndpoints.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
+using Microsoft.AspNetCore.Identity.Data;
+
+namespace AeonRegistry.Endpoints.CustomIdentityEndpoints;
+
+public static class CustomIdentityEndpoints
+{
+    public static IEndpointRouteBuilder MapCustomIdentityEndpoints(this IEndpointRouteBuilder route)
+    {
+        // Make Group
+        var group = route.MapGroup("/api/auth")
+            .WithTags("Admin");
+
+        // Make Endpoints
+        group.MapPost("/register-admin", RegisterUser)
+            .WithName("RegisterAdmin")
+            .WithSummary("Register User")
+            .WithDescription("Registers a user must have admin role")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+        //.RequireAuthorization("AdminPolicy");
+
+        group.MapPost("/reset-password", ResetPassword)
+            .WithName("ResetPassword")
+            .WithSummary("Reset User Password")
+            .WithDescription("Custom Reset Password for a user")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+
+        // Return Route
+        return route;
+    }
+
+    private static async Task<IResult> RegisterUser(
+        RegisterUserRequest request,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        IEmailSender emailSender,
+        IConfiguration config)
+    {
+        if (await userManager.FindByEmailAsync(request.Email) is not null)
+        {
+            return Results.BadRequest(new { Error = $"User with email {request.Email} already exists" });
+        }
+        var user = new ApplicationUser
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            FirstName = request.FirstName,
+            LastName = request.LastName
+        };
+
+        var tempPassword = "TempPassword123!";
+
+        var created = await userManager.CreateAsync(user, tempPassword);
+
+        if (!created.Succeeded)
+        {
+            return Results.BadRequest(new { Error = created.Errors });
+        }
+
+        if (await roleManager.RoleExistsAsync("Researcher"))
+        {
+            await userManager.AddToRoleAsync(user, "Researcher");
+        }
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        var baseURL = config["BaseURL"] ?? "https://localhost:5252";
+
+        await emailSender.SendEmailAsync(
+            request.Email,
+            "Welcome to Aeon",
+            $"""
+            Your account has been created. Please change your password by visiting: {baseURL}/SetPassword.html
+            
+            {baseURL}/SetPassword.html?email={request.Email}&resetCode={encodedToken}
+
+            """
+        );
+
+        return Results.Ok(new { Message = $"User {user.Email} created. Password reset link sent." });
+    }
+
+    private static async Task<IResult> ResetPassword(
+        ResetPasswordRequest request,
+        UserManager<ApplicationUser> userManager)
+    {
+        if (
+            string.IsNullOrEmpty(request.Email) ||
+            string.IsNullOrEmpty(request.ResetCode) ||
+            string.IsNullOrEmpty(request.NewPassword))
+        {
+            return Results.BadRequest(new { Message = "All Fields are required" });
+        }
+
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user is null)
+        {
+            return Results.BadRequest(new { Message = $"User {request.Email} not found" });
+        }
+
+        try
+        {
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.ResetCode));
+            var result = await userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
+            if (!result.Succeeded)
+            {
+                return Results.BadRequest(new { Message = "Something went wrong." });
+            }
+        }
+        catch (FormatException)
+        {
+            return Results.BadRequest(new { Message = "Invalid Token" });
+        }
+        catch (Exception ex)
+        {
+            return Results.BadRequest(new { Message = $"Error: {ex.Message}" });
+        }
+
+        return Results.Ok(new { Message = "Password reset successfully" });
+    }
+
+}

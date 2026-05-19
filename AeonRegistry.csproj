@@ -27,6 +27,8 @@
   <ItemGroup>
     <Folder Include="Data/" />
     <Folder Include="Endpoints/" />
+    <Folder Include="Endpoints/CustomIdentityEndpoints/" />
+    <Folder Include="Endpoints/CustomIdentityEndpoints/Models/" />
     <Folder Include="Endpoints/Home/" />
     <Folder Include="Middleware/" />
     <Folder Include="Models/" />

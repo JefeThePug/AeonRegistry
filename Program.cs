@@ -1,4 +1,5 @@
 
+using AeonRegistry.Endpoints.CustomIdentityEndpoints;
 using AeonRegistry.Endpoints.Home;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -59,7 +60,8 @@ var authRouteGroup = app.MapGroup("/api/auth")
     .WithTags("Admin");
 authRouteGroup.MapIdentityApi<ApplicationUser>();
 
-// map Home Group endpoints
+
 app.MapHomeEndpoints();
+app.MapCustomIdentityEndpoints();
 
 app.Run();

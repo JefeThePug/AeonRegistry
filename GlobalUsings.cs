@@ -1,3 +1,5 @@
+global using System.ComponentModel.DataAnnotations;
+
 global using AeonRegistry.Extensions;
 global using AeonRegistry.Data;
 global using AeonRegistry.Models;
