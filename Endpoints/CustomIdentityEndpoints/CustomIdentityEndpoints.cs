@@ -32,6 +32,13 @@ public static class CustomIdentityEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
+        group.MapPost("/forgot-password", ForgotPassword)
+            .WithName("ForgotPassword")
+            .WithSummary("Custom Forgot Password")
+            .WithDescription("Custom Forgot Password flow")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
+
         // Return Route
         return route;
     }
@@ -73,14 +80,15 @@ public static class CustomIdentityEndpoints
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
         var baseURL = config["BaseURL"] ?? "https://localhost:5252";
+        var resetLink = $"{baseURL}/SetPassword.html?email={request.Email}&resetCode={encodedToken}";
 
         await emailSender.SendEmailAsync(
             request.Email,
             "Welcome to Aeon",
             $"""
-            Your account has been created. Please change your password by visiting: {baseURL}/SetPassword.html
+            Your account has been created. Please change your password by visiting:
             
-            {baseURL}/SetPassword.html?email={request.Email}&resetCode={encodedToken}
+            {resetLink}
 
             """
         );
@@ -127,4 +135,38 @@ public static class CustomIdentityEndpoints
         return Results.Ok(new { Message = "Password reset successfully" });
     }
 
+    private static async Task<IResult> ForgotPassword(
+        ForgotPasswordRequest request,
+        UserManager<ApplicationUser> userManager,
+        IEmailSender emailSender,
+        IConfiguration config)
+    {
+        if (string.IsNullOrEmpty(request.Email))
+        {
+            return Results.BadRequest(new { Message = "Email Address is required" });
+        }
+        var user = await userManager.FindByEmailAsync(request.Email);
+
+        if (user is not null)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var baseURL = config["BaseURL"] ?? "https://localhost:5252";
+            var resetLink = $"{baseURL}/SetPassword.html?email={request.Email}&resetCode={encodedToken}";
+
+            await emailSender.SendEmailAsync(
+                request.Email,
+                "Reset Your Password",
+                $"""
+            To Reset your password, use the link:
+            
+            {resetLink}
+
+            """
+            );
+        }
+
+        return Results.Ok(new { Message = "If the email exists, a Forgot Password link will be sent" });
+    }
 }
