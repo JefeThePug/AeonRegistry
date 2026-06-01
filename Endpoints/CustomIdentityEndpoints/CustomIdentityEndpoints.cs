@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using Microsoft.AspNetCore.Identity.Data;
+using System.Security.Claims;
 
 namespace AeonRegistry.Endpoints.CustomIdentityEndpoints;
 
@@ -38,6 +39,15 @@ public static class CustomIdentityEndpoints
             .WithDescription("Custom Forgot Password flow")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
+
+        group.MapGet("/manage/profile", GetProfileInfo)
+            .WithName("GetProfileInfo")
+            .WithSummary("Get Current User Profile")
+            .WithDescription("Get current user profile info")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
+
 
         // Return Route
         return route;
@@ -168,5 +178,26 @@ public static class CustomIdentityEndpoints
         }
 
         return Results.Ok(new { Message = "If the email exists, a Forgot Password link will be sent" });
+    }
+
+    private static async Task<IResult> GetProfileInfo(
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager)
+    {
+        var user = await userManager.GetUserAsync(principal);
+        if (user is null)
+        {
+            return Results.NotFound();
+        }
+
+        var response = new UserProfileResponse
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            FullName = user.FullName
+        };
+        return Results.Ok(response);
     }
 }
