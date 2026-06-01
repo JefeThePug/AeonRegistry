@@ -58,6 +58,15 @@ public static class CustomIdentityEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status404NotFound)
             .RequireAuthorization();
+
+        group.MapGet("/manage/users", ListAllUsers)
+            .WithName("ListUsers")
+            .WithSummary("List All Users")
+            .WithDescription("Get a list of all registered users")
+            .Produces<IEnumerable<UserProfileResponse>>(StatusCodes.Status200OK) // List of UserProfileRequest objects
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
+
         // Return Route
         return route;
     }
@@ -236,5 +245,21 @@ public static class CustomIdentityEndpoints
         }
 
         return Results.Ok(new { Message = "Profile Updated Successfully" });
+    }
+
+    private static async Task<IResult> ListAllUsers(UserManager<ApplicationUser> userManager)
+    {
+        var users = userManager.Users
+            .Select(u => new UserProfileResponse
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                FullName = u.FullName,
+                Email = u.Email
+            })
+            .ToList();
+
+        return Results.Ok(users);
     }
 }
