@@ -31,6 +31,33 @@ namespace AeonRegistry.Endpoints.Sites
                 .Produces<PublicSiteResponse>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status500InternalServerError);
+
+            var privateGroup = route.MapGroup("/api/private/sites")
+                .RequireAuthorization()
+                .WithSummary("Private Site Endpoints")
+                .WithDescription("Endpoints that require authentication")
+                .WithTags("Sites - Private")
+                .AddEndpointFilter<ExceptionHandlingFilter>();
+
+            privateGroup.MapGet("", GetAllPrivateSites)
+                .WithName(nameof(GetAllPrivateSites))
+                .WithSummary("Get All Sites (Private)")
+                .WithDescription("Returns all sites with their private data")
+                .Produces<List<PrivateSiteResponse>>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized)
+                .Produces(StatusCodes.Status403Forbidden)
+                .Produces(StatusCodes.Status500InternalServerError);
+
+            privateGroup.MapGet("{id:int}", GetPrivateSiteById)
+                .WithName(nameof(GetPrivateSiteById))
+                .WithSummary("Get Site By ID (Private)")
+                .WithDescription("Returns all data from the site which matches the user-provided ID")
+                .Produces<PublicSiteResponse>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized)
+                .Produces(StatusCodes.Status403Forbidden)
+                .Produces(StatusCodes.Status404NotFound)
+                .Produces(StatusCodes.Status500InternalServerError);
+
             return route;
         }
 
@@ -55,6 +82,24 @@ namespace AeonRegistry.Endpoints.Sites
             return TypedResults.Ok(site);
         }
 
+        private static async Task<Ok<List<PrivateSiteResponse>>> GetAllPrivateSites(
+            ISiteService service,
+            CancellationToken ct)
+        {
+            return TypedResults.Ok(await service.GetAllPrivateSitesAsync(ct));
+        }
 
+        private static async Task<Results<Ok<PrivateSiteResponse>, NotFound>> GetPrivateSiteById(
+            int id,
+            ISiteService service,
+            CancellationToken ct)
+        {
+            var site = await service.GetPrivateSiteByIdAsync(id, ct);
+            if (site is null)
+            {
+                return TypedResults.NotFound();
+            }
+            return TypedResults.Ok(site);
+        }
     }
 }
