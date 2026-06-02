@@ -24,6 +24,13 @@ namespace AeonRegistry.Endpoints.Sites
                 .Produces<List<PublicSiteResponse>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status500InternalServerError);
 
+            publicGroup.MapGet("{id:int}", GetPublicSiteById)
+                .WithName(nameof(GetPublicSiteById))
+                .WithSummary("Get Site By ID (Public)")
+                .WithDescription("Returns the public data (only) from the site which matches the user-provided ID")
+                .Produces<PublicSiteResponse>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound)
+                .Produces(StatusCodes.Status500InternalServerError);
             return route;
         }
 
@@ -34,6 +41,20 @@ namespace AeonRegistry.Endpoints.Sites
         {
             return TypedResults.Ok(await service.GetAllPublicSitesAsync(ct));
         }
+
+        private static async Task<Results<Ok<PublicSiteResponse>, NotFound>> GetPublicSiteById(
+            int id,
+            ISiteService service,
+            CancellationToken ct)
+        {
+            var site = await service.GetPublicSiteByIdAsync(id, ct);
+            if (site is null)
+            {
+                return TypedResults.NotFound();
+            }
+            return TypedResults.Ok(site);
+        }
+
 
     }
 }
