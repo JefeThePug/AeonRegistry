@@ -1,6 +1,8 @@
 
 using AeonRegistry.Endpoints.CustomIdentityEndpoints;
 using AeonRegistry.Endpoints.Home;
+using AeonRegistry.Endpoints.Sites;
+using AeonRegistry.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,9 @@ builder.Services.AddAuthorizationBuilder()
 
 // email sender services
 builder.Services.AddTransient<IEmailSender, ConsoleEmailService>();
+
+// custom services
+builder.Services.AddScoped<ISiteService, SiteService>();
 
 // enable validation for minimal APIs
 builder.Services.AddValidation();
@@ -68,5 +73,6 @@ authRouteGroup.MapIdentityApi<ApplicationUser>();
 
 app.MapHomeEndpoints();
 app.MapCustomIdentityEndpoints();
+app.MapSiteEndpoints();
 
 app.Run();
