@@ -18,7 +18,5 @@ namespace AeonRegistry.Models
         public string? PublicNarrative { get; set; }
         [MaxLength(2000)]
         public string? AeonNarrative { get; set; }
-
-
     }
 }
