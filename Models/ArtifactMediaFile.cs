@@ -10,7 +10,7 @@ namespace AeonRegistry.Models
         public string? FileName { get; set; } = string.Empty;
         public string? ContentType { get; set; } = "image/jpeg";
         public byte[] Data { get; set; } = [];
-        public bool IsPrimary { get; set; } = false; //Main Image
+        public bool IsPrimary { get; set; } = false; // checks for Main Image
     }
 
 }
