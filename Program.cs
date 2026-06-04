@@ -39,6 +39,7 @@ builder.Services.AddTransient<IEmailSender, ConsoleEmailService>();
 // custom services
 builder.Services.AddScoped<ISiteService, SiteService>();
 builder.Services.AddScoped<IArtifactMediaFileService, ArtifactMediaFileService>();
+builder.Services.AddScoped<IArtifactService, ArtifactService>();
 
 // enable validation for minimal APIs
 builder.Services.AddValidation();
@@ -72,10 +73,10 @@ var authRouteGroup = app.MapGroup("/api/auth")
     .WithTags("Admin");
 authRouteGroup.MapIdentityApi<ApplicationUser>();
 
-
 app.MapHomeEndpoints();
 app.MapCustomIdentityEndpoints();
 app.MapSiteEndpoints();
+app.MapArtifactEndpoints();
 app.MapArtifactMediaFileEndpoints();
 
 app.Run();

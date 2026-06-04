@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace AeonRegistry.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ArtifactType
     {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
         Weapon = 1,
         EnergySource = 2,
         CommunicationDevice = 3,

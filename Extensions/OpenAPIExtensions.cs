@@ -1,5 +1,7 @@
 
+using AeonRegistry.Filters;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
 namespace AeonRegistry.Extensions;
@@ -38,6 +40,8 @@ public static class OpenAPIExtensions
                 - User Role Management
                 """
             });
+            c.UseInlineDefinitionsForEnums();
+            c.SchemaFilter<EnumStringSchemaFilter>();
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -82,6 +86,13 @@ public static class OpenAPIExtensions
                 if (hiddenEndpoints.Contains(path, StringComparer.OrdinalIgnoreCase))
                     return false;
                 return true;
+            });
+
+            c.MapType<DateTime>(() => new OpenApiSchema
+            {
+                Type = "string",
+                Format = "date-time",
+                Example = new OpenApiString(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))
             });
         });
 
