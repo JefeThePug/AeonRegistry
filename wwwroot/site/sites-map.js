@@ -263,6 +263,8 @@ function buildArtifactCard(a) {
     card.querySelector("h6").textContent = a.name;
     card.querySelector(".catalog").innerHTML =
         `<strong>Catalog #:</strong> ${a.catalogNumber}`;
+    card.querySelector(".type").innerHTML =
+        `<strong>Type:</strong> ${(a.type).replace(/([a-z])([A-Z])/g, "$1 $2")}`;
     card.querySelector(".description").textContent =
         a.publicNarrative || "No public narrative available.";
 
