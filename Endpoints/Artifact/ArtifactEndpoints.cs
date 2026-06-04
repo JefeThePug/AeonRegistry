@@ -32,14 +32,6 @@ namespace AeonRegistry.Endpoints.Artifact
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status500InternalServerError);
 
-            publicGroup.MapGet("/{siteId:int}/artifacts", GetPublicArtifactsBySite)
-                .WithName(nameof(GetPublicArtifactsBySite))
-                .WithSummary("Get All Artifacts From Single Site (Public Data)")
-                .WithDescription("Returns the public data for all artifacts from a user-selected site")
-                .Produces<List<PublicArtifactResponse>>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status500InternalServerError);
-
             var privateGroup = route.MapGroup("/api/private/artifacts")
                 .RequireAuthorization()
                 .WithSummary("Artifact Endpoints (Private)")
@@ -62,16 +54,6 @@ namespace AeonRegistry.Endpoints.Artifact
                 .WithSummary("Get Artifact By ID (Private Data)")
                 .WithDescription("Returns all the data for a chosen artifact")
                 .Produces<PrivateArtifactResponse>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status403Forbidden)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status500InternalServerError);
-
-            privateGroup.MapGet("/{siteId:int}/artifacts", GetPrivateArtifactsBySite)
-                .WithName(nameof(GetPrivateArtifactsBySite))
-                .WithSummary("Get All Artifacts From Single Site (Private Data)")
-                .WithDescription("Returns all data for all artifacts from a user-selected site")
-                .Produces<List<PrivateArtifactResponse>>(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status403Forbidden)
                 .Produces(StatusCodes.Status404NotFound)
@@ -124,19 +106,6 @@ namespace AeonRegistry.Endpoints.Artifact
             return TypedResults.Ok(artifacts);
         }
 
-        private static async Task<Results<Ok<List<PublicArtifactResponse>>, NotFound>> GetPublicArtifactsBySite(
-            int siteId,
-            IArtifactService service,
-            CancellationToken ct)
-        {
-            var artifacts = await service.GetPublicArtifactsBySiteAsync(siteId, ct);
-            if (artifacts is null || artifacts.Count == 0)
-            {
-                return TypedResults.NotFound();
-            }
-            return TypedResults.Ok(artifacts);
-        }
-
         private static async Task<Results<Ok<PublicArtifactResponse>, NotFound>> GetPublicArtifactById(
             int id,
             IArtifactService service,
@@ -165,19 +134,6 @@ namespace AeonRegistry.Endpoints.Artifact
         {
             var artifact = await service.GetPrivateArtifactByIdAsync(id, ct);
             return artifact is null ? TypedResults.NotFound() : TypedResults.Ok(artifact);
-        }
-
-        private static async Task<Results<Ok<List<PrivateArtifactResponse>>, NotFound>> GetPrivateArtifactsBySite(
-            int siteId,
-            IArtifactService service,
-            CancellationToken cf)
-        {
-            var artifacts = await service.GetPrivateArtifactsBySiteAsync(siteId, cf);
-            if (artifacts is null || artifacts.Count == 0)
-            {
-                return TypedResults.NotFound();
-            }
-            return TypedResults.Ok(artifacts);
         }
 
         private static async Task<Results<Created<PrivateArtifactResponse>, NotFound>> CreateArtifact(
