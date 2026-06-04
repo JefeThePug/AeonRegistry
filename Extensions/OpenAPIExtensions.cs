@@ -38,6 +38,9 @@ public static class OpenAPIExtensions
                 - Research Record Submissions
                 - Secure Media Storage
                 - User Role Management
+                
+                [Launch Public Test Site](/site/sites-map.html)
+                
                 """
             });
             c.UseInlineDefinitionsForEnums();
