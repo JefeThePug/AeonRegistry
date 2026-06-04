@@ -47,16 +47,13 @@ builder.Services.AddValidation();
 var app = builder.Build();
 
 // App Stage
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.MapScalarApiReference(options =>
 {
-    app.UseSwagger();
-    app.MapScalarApiReference(options =>
-    {
-        options.Title = "Aeon Registry API";
-        options.Theme = ScalarTheme.Kepler;
-        options.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
-    });
-}
+    options.Title = "Aeon Registry API";
+    options.Theme = ScalarTheme.Kepler;
+    options.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json";
+});
 
 using (var scope = app.Services.CreateScope())
 {
